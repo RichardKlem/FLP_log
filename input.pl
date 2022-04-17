@@ -14,19 +14,16 @@ read_line(L,C) :-
 		read_line(LL,_),% atom_codes(C,[Cd]),
 		[C|LL] = L).
 
-
 /** testuje znak na EOF nebo LF */
 isEOFEOL(C) :-
 	C == end_of_file;
 	(char_code(C,Code), Code==10).
-
 
 read_lines(Ls) :-
 	read_line(L,C),
 	( C == end_of_file, Ls = [] ;
 	  read_lines(LLs), Ls = [L|LLs]
 	).
-
 
 /** rozdeli radek na podseznamy */
 split_line([],[[]]) :- !.
@@ -39,6 +36,8 @@ split_line([H|T], [[H|G]|S1]) :- split_line(T,[G|S1]). % G je prvni seznam ze se
 split_lines([],[]).
 split_lines([L|Ls],[H|T]) :- split_lines(Ls,T), split_line(L,H).
 
+/* MY PREDICATES */
+solved(Res) :- Res = [[1,1,1,1,1,1,1,1,1],[6,6,6,6,6,6,6,6,6],[2,2,2,2,2,2,2,2,2],[5,5,5,5,5,5,5,5,5],[4,4,4,4,4,4,4,4,4],[3,3,3,3,3,3,3,3,3]].
 list_concat([],L,L).
 list_concat([X1|L1],L2,[X1|L3]) :- list_concat(L1,L2,L3).
 
@@ -175,47 +174,57 @@ lr(S, Res) :-
 	moveCubeFront(S3,S4),
 	moveCubeRight(S4, Res).
 
+whiteUp(S, Res) :-
+	[E,A,B,C,D,F|_] = S ,
+	((nth0(5,E, E1) , E1 == '1', Res = S) ;
+	(nth0(5,A, A1) , A1 == '1', moveCubeBack(S, Res)) ;
+	(nth0(5,B, B1) , B1 == '1', moveCubeLeft(S, Res)) ;
+	(nth0(5,C, C1) , C1 == '1', moveCubeFront(S, Res)) ;
+	(nth0(5,D, D1) , D1 == '1', moveCubeRight(S, Res)) ;
+	(nth0(5,F, F1) , F1 == '1', moveCubeFront(S, S1) , moveCubeFront(S1, Res))
+).
+
+
+%  TODO nefunci, jen nastrel, spatne podminky
+findFreeCorner(S, Res) :-
+	[E,A,B,C,D,F|_] = S ,
+	nth0(8, E, E9) ,
+	(
+		(E9 == '1' , (Res = S)) ;
+	(u(S, S1) , findFreeCorner(S1, Res))
+	).
+
+	applyAlgos(S, Res) :-
+		whiteUp(S, S1),
+		findFreeCorner(S1, Res)
+		.
+
+%  TODO, nefunkci, nefunguje pro nic jineho nez nulu
+generateRandomCube(S, N, Res) :-
+	(N == 0 , Res = S) ;
+	(
+		random(0, 7, Rnd) ,
+		(
+			% ( Rnd == 1 , u(S, R)) ;
+			% ( Rnd == 2 , d(S, R)) ;
+			% ( Rnd == 3 , r(S, R)) ;
+			% ( Rnd == 4 , l(S, R)) ;
+			% ( Rnd == 5 , f(S, R)) ;
+			% ( Rnd == 6 , b(S, R))
+			b(S,R)
+		) , generateRandomCube(R, N - 1, Res)
+	).
+
 start :-
 		prompt(_, ''),
 		read_lines(LL),
 		split_lines(LL,S),
 		parseInput(S, R),
-		u(R, Res1),
-		write(Res1),
-		write(' -- u\n'),
-		ur(R, Res2),
-		write(Res2),
-		write(' -- ur\n'),
-		d(R, Res3),
-		write(Res3),
-		write(' -- d\n'),
-		dr(R, Res4),
-		write(Res4),
-		write(' -- dr\n'),
-		r(R, Res5),
-		write(Res5),
-		write(' -- r\n'),
-		rr(R, Res6),
-		write(Res6),
-		write(' -- rr\n'),
-		l(R, Res7),
-		write(Res7),
-		write(' -- l\n'),
-		lr(R, Res8),
-		write(Res8),
-		write(' -- lr\n'),
-		f(R, Res9),
-		write(Res9),
-		write(' -- f\n'),
-		fr(R, Res10),
-		write(Res10),
-		write(' -- fr\n'),
-		b(R, Res11),
-		write(Res11),
-		write(' -- b\n'),
-		br(R, Res12),
-		write(Res12),
-		write(' -- br\n'),
+		% applyAlgos(R, Res),
+		solved(Solved),
+		generateRandomCube(Solved, 1, Res),
+		write(Res),
+		write('\n'),
 		halt.
 
 
