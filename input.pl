@@ -199,20 +199,18 @@ findFreeCorner(S, Res) :-
 		findFreeCorner(S1, Res)
 		.
 
-%  TODO, nefunkci, nefunguje pro nic jineho nez nulu
 generateRandomCube(S, N, Res) :-
 	(N == 0 , Res = S) ;
 	(
 		random(0, 7, Rnd) ,
 		(
-			% ( Rnd == 1 , u(S, R)) ;
-			% ( Rnd == 2 , d(S, R)) ;
-			% ( Rnd == 3 , r(S, R)) ;
-			% ( Rnd == 4 , l(S, R)) ;
-			% ( Rnd == 5 , f(S, R)) ;
-			% ( Rnd == 6 , b(S, R))
-			b(S,R)
-		) , generateRandomCube(R, N - 1, Res)
+			( Rnd == 1 , u(S, R)) ;
+			( Rnd == 2 , d(S, R)) ;
+			( Rnd == 3 , r(S, R)) ;
+			( Rnd == 4 , l(S, R)) ;
+			( Rnd == 5 , f(S, R)) ;
+			( Rnd == 6 , b(S, R))
+		), Nn is (N - 1), generateRandomCube(R, Nn, Res)
 	).
 
 start :-
@@ -222,7 +220,7 @@ start :-
 		parseInput(S, R),
 		% applyAlgos(R, Res),
 		solved(Solved),
-		generateRandomCube(Solved, 1, Res),
+		generateRandomCube(Solved, 50, Res),
 		write(Res),
 		write('\n'),
 		halt.
